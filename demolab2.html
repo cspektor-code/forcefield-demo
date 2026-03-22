@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ForceField Demo Lab</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#F3F4F6}
+.nav{display:flex;align-items:center;justify-content:space-between;padding:14px 32px;background:#fff;border-bottom:1px solid #E5E7EB}
+.nav-logo{display:flex;align-items:center;gap:8px;font-size:16px;font-weight:700;color:#111827}
+.logo-icon{width:28px;height:28px;background:#4F46E5;border-radius:6px;display:flex;align-items:center;justify-content:center}
+.nav-links{display:flex;gap:24px}
+.nav-links a{font-size:13px;color:#6B7280;text-decoration:none}
+.nav-cta{background:#4F46E5;color:#fff;border:none;border-radius:8px;padding:8px 18px;font-size:13px;font-weight:600;cursor:pointer}
+.page{max-width:1000px;margin:0 auto;padding:2.5rem 1.5rem 4rem}
+.hero{text-align:center;margin-bottom:2rem}
+.badge{display:inline-flex;align-items:center;gap:6px;background:#F0FDF4;border:1px solid #86EFAC;border-radius:20px;padding:4px 12px;font-size:12px;color:#166534;margin-bottom:.85rem}
+.badge-dot{width:6px;height:6px;background:#22C55E;border-radius:50%}
+.hero h1{font-size:30px;font-weight:700;color:#111827;margin:0 0 8px}
+.hero p{font-size:14px;color:#6B7280;line-height:1.7;max-width:520px;margin:0 auto}
+.main-row{display:grid;grid-template-columns:1fr 260px;gap:18px;margin-bottom:2.5rem;align-items:start}
+.scan-card{background:#fff;border:1px solid #E5E7EB;border-radius:12px;padding:22px}
+.scan-label{font-size:11px;font-weight:600;color:#9CA3AF;text-transform:uppercase;letter-spacing:.06em;margin:0 0 10px}
+.scan-card textarea{width:100%;min-height:130px;border:1.5px solid #E5E7EB;border-radius:10px;padding:14px 16px;font-size:14px;font-family:inherit;color:#111827;background:#fff;resize:none;line-height:1.7;margin-bottom:12px}
+.scan-card textarea:focus{outline:none;border-color:#4F46E5;box-shadow:0 0 0 3px rgba(79,70,229,.08)}
+.scan-btn{width:100%;background:#4F46E5;color:#fff;border:none;border-radius:8px;padding:13px;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px}
+.result{border-radius:8px;padding:14px 16px;margin-top:14px;display:none}
+.result.blocked{background:#FEF2F2;border:1px solid #FCA5A5}
+.result.safe{background:#F0FDF4;border:1px solid #86EFAC}
+.result-header{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.result-icon{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff}
+.result-icon.bi{background:#EF4444}
+.result-icon.si{background:#22C55E}
+.result-title{font-size:13px;font-weight:600}
+.blocked .result-title{color:#991B1B}
+.safe .result-title{color:#166534}
+.result-body{font-size:12px;line-height:1.6}
+.blocked .result-body{color:#B91C1C}
+.safe .result-body{color:#15803D}
+.steps-col{display:flex;flex-direction:column;gap:10px}
+.steps-head{font-size:11px;font-weight:600;color:#9CA3AF;text-transform:uppercase;letter-spacing:.06em;margin:0 0 4px}
+.step{background:#fff;border:1px solid #E5E7EB;border-radius:10px;padding:13px 14px;display:flex;align-items:flex-start;gap:10px}
+.step-num{width:22px;height:22px;min-width:22px;background:#4F46E5;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:#fff;margin-top:1px}
+.step-lbl{font-size:12px;font-weight:600;color:#111827;margin:0 0 3px}
+.step-sub{font-size:11px;color:#6B7280;margin:0;line-height:1.4}
+.stateful{margin-bottom:2.5rem;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.1)}
+.stateful-intro{background:linear-gradient(135deg,#1E1B4B,#312E81);padding:22px 26px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.stateful-left{flex:1}
+.eyebrow{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:20px;padding:3px 10px;font-size:11px;color:rgba(255,255,255,.85);margin-bottom:8px}
+.eyebrow-dot{width:5px;height:5px;background:#A5B4FC;border-radius:50%}
+.stateful-intro h2{font-size:19px;font-weight:700;color:#fff;margin:0 0 6px;line-height:1.35}
+.stateful-intro p{font-size:13px;color:rgba(255,255,255,.7);margin:0;line-height:1.6;max-width:540px}
+.watch-btn{background:#fff;color:#4F46E5;border:none;border-radius:8px;padding:11px 22px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0}
+.sim-panel{background:#fff}
+.scenario-bar{background:#1E1B4B;padding:12px 22px;display:flex;align-items:center;gap:10px}
+.scenario-icon{width:30px;height:30px;background:rgba(255,255,255,.1);border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.scenario-title{font-size:13px;font-weight:600;color:#fff;margin:0 0 2px}
+.scenario-sub{font-size:11px;color:rgba(255,255,255,.6);margin:0}
+.risk-wrap{background:#0F0C29;padding:12px 22px;display:flex;align-items:center;gap:14px}
+.risk-label{font-size:10px;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.05em;white-space:nowrap}
+.risk-track{flex:1;height:8px;background:rgba(255,255,255,.12);border-radius:4px;overflow:hidden}
+.risk-fill{height:100%;border-radius:4px;width:0%;transition:width .9s ease,background-color .9s ease;background:#22C55E}
+.risk-score{font-size:14px;font-weight:600;color:#fff;min-width:64px;text-align:right}
+.blocked-banner{background:#EF4444;color:#fff;text-align:center;padding:12px;font-size:14px;font-weight:700;display:none}
+.sim-body{padding:22px 24px;min-height:280px;background:#FAFAFA}
+.sim-step{display:none}
+.step-num-label{font-size:10px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.08em;margin:0 0 12px}
+.chain{display:flex;gap:6px;align-items:center;margin-bottom:14px}
+.cdot{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0}
+.cdot.done{background:#6366F1}
+.cdot.cur{background:#EF4444;animation:pulse 1.2s infinite}
+.cdot.blk{background:#EF4444}
+.cdot.pend{background:#D1D5DB;color:#9CA3AF}
+.carrow{color:#9CA3AF;font-size:13px}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,.4)}50%{box-shadow:0 0 0 7px rgba(239,68,68,0)}}
+.three-col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px}
+.col{border-radius:8px;padding:13px 14px}
+.col.agent{background:#EEF2FF;border:1px solid #C7D2FE}
+.col.looks{background:#F9FAFB;border:1px solid #E5E7EB}
+.col.safe{background:#F0FDF4;border:1px solid #86EFAC}
+.col.warn{background:#FFFBEB;border:1px solid #FDE68A}
+.col.danger{background:#FEF2F2;border:1px solid #FCA5A5}
+.col.blk{background:#EF4444;border:1px solid #DC2626}
+.col-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin:0 0 5px}
+.agent .col-label{color:#4338CA}
+.looks .col-label{color:#6B7280}
+.safe .col-label{color:#166534}
+.warn .col-label{color:#92400E}
+.danger .col-label{color:#991B1B}
+.blk .col-label{color:rgba(255,255,255,.8)}
+.col-val{font-size:12px;line-height:1.55;margin:0}
+.agent .col-val{color:#3730A3;font-family:monospace;font-size:11px}
+.looks .col-val{color:#374151}
+.safe .col-val{color:#15803D}
+.warn .col-val{color:#B45309}
+.danger .col-val{color:#B91C1C}
+.blk .col-val{color:#fff;font-weight:600}
+.insight{background:#F1F5F9;border-left:3px solid #4F46E5;border-radius:0 8px 8px 0;padding:10px 14px;font-size:12px;color:#4B5563;line-height:1.65}
+.insight.danger{background:#FEF2F2;border-left-color:#EF4444;color:#991B1B}
+.intro-panel{text-align:center;padding:2.5rem 1rem}
+.intro-icon{width:52px;height:52px;background:#EEF2FF;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem}
+.intro-panel h2{font-size:15px;font-weight:700;color:#111827;margin:0 0 6px}
+.intro-panel p{font-size:13px;color:#6B7280;line-height:1.6;max-width:400px;margin:0 auto}
+.controls{padding:14px 22px;border-top:1px solid #E5E7EB;display:flex;align-items:center;gap:10px;background:#fff}
+.play-btn{background:#4F46E5;color:#fff;border:none;border-radius:8px;padding:9px 20px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px}
+.play-btn:disabled{opacity:.45;cursor:not-allowed}
+.next-btn{background:#fff;color:#374151;border:1px solid #D1D5DB;border-radius:8px;padding:9px 20px;font-size:13px;cursor:pointer}
+.next-btn:disabled{opacity:.4;cursor:not-allowed}
+.progress{font-size:12px;color:#9CA3AF}
+.reset-btn{background:none;color:#9CA3AF;border:none;font-size:12px;cursor:pointer;margin-left:auto}
+.divider{display:flex;align-items:center;gap:12px;margin:0 0 1.5rem}
+.divider-line{flex:1;height:.5px;background:#E5E7EB}
+.divider-text{font-size:12px;color:#9CA3AF;white-space:nowrap}
+.scenarios-lbl{font-size:13px;font-weight:700;color:#374151;margin:0 0 4px}
+.scenarios-sub{font-size:12px;color:#6B7280;margin:0 0 14px}
+.scenarios{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.scenario{background:#fff;border:1.5px solid #E5E7EB;border-radius:12px;padding:18px;cursor:pointer;display:flex;flex-direction:column;transition:border-color .15s}
+.scenario:hover{border-color:#4F46E5;background:#FAFAFE}
+.scenario-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px}
+.sc-icon{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center}
+.sc-arrow{color:#9CA3AF;font-size:15px;transition:transform .15s,color .15s}
+.scenario:hover .sc-arrow{transform:translateX(3px);color:#4F46E5}
+.sc-title{font-size:13px;font-weight:600;color:#111827;margin:0 0 5px}
+.sc-desc{font-size:12px;color:#6B7280;margin:0 0 14px;line-height:1.5;flex:1}
+.sc-cta{font-size:11px;color:#4F46E5;font-weight:600;margin:0;border-top:1px solid #F3F4F6;padding-top:10px}
+.footer-note{background:#EEF2FF;border-radius:10px;padding:14px 18px;display:flex;align-items:flex-start;gap:10px;margin-top:2rem}
+.footer-note p{font-size:12px;color:#4338CA;margin:0;line-height:1.6}
+</style>
+</head>
+<body>
+
+<script>
+(function(){
+  function fixPage(){
+    var panel=document.getElementById('simPanel');
+    if(panel) panel.style.display='none';
+    ['sim-0','sim-1','sim-2','sim-3','sim-4'].forEach(function(id){
+      var el=document.getElementById(id);
+      if(el) el.style.display='none';
+    });
+    var s0=document.getElementById('sim-0');
+    if(s0) s0.style.display='block';
+    var banner=document.getElementById('blockedBanner');
+    if(banner) banner.style.display='none';
+  }
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',fixPage);
+  } else {
+    fixPage();
+  }
+  window.addEventListener('load',fixPage);
+})();
+</script>
+<nav class="nav">
+  <div class="nav-logo">
+    <div class="logo-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" width="16" height="16"><path d="M12 2L3 7v5c0 5.25 3.75 10.15 9 11.35C17.25 22.15 21 17.25 21 12V7L12 2z"/></svg></div>
+    ForceField
+  </div>
+  <div class="nav-links"><a href="#">Demo Lab</a><a href="#">Scanner</a><a href="#">Docs</a><a href="#">Pricing</a><a href="#">Benchmarks</a></div>
+  <button class="nav-cta">See it in action</button>
+</nav>
+
+<div class="page">
+  <div class="hero">
+    <div class="badge"><div class="badge-dot"></div> Live threat detection</div>
+    <h1>See ForceField block attacks in real time</h1>
+    <p>Type any prompt below and watch the gateway detect, block, and explain the threat in seconds.</p>
+  </div>
+
+  <div class="main-row">
+    <div class="scan-card">
+      <p class="scan-label">Try it now — no account required</p>
+      <textarea id="promptInput" placeholder="Type any prompt here — malicious or safe — and see what ForceField does with it..."></textarea>
+      <button class="scan-btn" onclick="runScan()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" width="14" height="14"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        Scan this prompt
+      </button>
+      <div class="result" id="scanResult">
+        <div class="result-header"><div class="result-icon" id="rIcon"></div><span class="result-title" id="rTitle"></span></div>
+        <div class="result-body" id="rBody"></div>
+      </div>
+    </div>
+    <div class="steps-col">
+      <p class="steps-head">How it works</p>
+      <div class="step"><div class="step-num">1</div><div><p class="step-lbl">Type any prompt</p><p class="step-sub">Your own words or a real attack attempt</p></div></div>
+      <div class="step"><div class="step-num">2</div><div><p class="step-lbl">ForceField inspects it</p><p class="step-sub">10-step pipeline runs in real time</p></div></div>
+      <div class="step"><div class="step-num">3</div><div><p class="step-lbl">See what was found</p><p class="step-sub">Threat type, risk level, and action taken</p></div></div>
+    </div>
+  </div>
+
+  <div class="stateful">
+    <div class="stateful-intro">
+      <div class="stateful-left">
+        <div class="eyebrow"><div class="eyebrow-dot"></div> ForceField exclusive capability</div>
+        <h2>Need protection from multi-stage malicious prompts?<br>ForceField has stateful capabilities.</h2>
+        <p>Most AI security tools only see one prompt at a time. ForceField remembers the entire agent chain — catching slow-burn attacks that look innocent at every individual step.</p>
+      </div>
+      <button class="watch-btn" id="watchBtn" onclick="toggleSim()">&#9654; Watch it in action</button>
+    </div>
+
+    <div class="sim-panel" id="simPanel">
+      <div class="scenario-bar">
+        <div class="scenario-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/></svg></div>
+        <div><p class="scenario-title">Scenario: Payroll data exfiltration via a trusted HR agent</p><p class="scenario-sub">A compromised agent with authorized access attempts a slow, 4-step extraction</p></div>
+      </div>
+      <div class="risk-wrap">
+        <span class="risk-label">Chain risk score</span>
+        <div class="risk-track"><div class="risk-fill" id="riskFill"></div></div>
+        <span class="risk-score" id="riskScore">0 / 100</span>
+      </div>
+      <div class="blocked-banner" id="blockedBanner">&#9940;&nbsp; ATTACK BLOCKED — ForceField halted the chain after detecting a 4-step exfiltration pattern</div>
+      <div class="sim-body" id="simBody">
+        <div class="sim-step" id="s0">
+          <div class="intro-panel">
+            <div class="intro-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4F46E5" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg></div>
+            <h2>Ready to run the simulation</h2>
+            <p>Press Play to watch automatically, or use Step to go one at a time. Watch the risk score climb as the chain reveals its true intent.</p>
+          </div>
+        </div>
+        <div class="sim-step" id="s1">
+          <p class="step-num-label">Step 1 of 4 &middot; Agent action</p>
+          <div class="chain"><div class="cdot cur">1</div><span class="carrow">&rarr;</span><div class="cdot pend">2</div><span class="carrow">&rarr;</span><div class="cdot pend">3</div><span class="carrow">&rarr;</span><div class="cdot pend">4</div></div>
+          <div class="three-col">
+            <div class="col agent"><p class="col-label">Agent prompt</p><p class="col-val">"List all files in /hr/payroll/"</p></div>
+            <div class="col looks"><p class="col-label">Looks like</p><p class="col-val">Routine directory listing. Normal HR workflow.</p></div>
+            <div class="col safe"><p class="col-label">ForceField sees</p><p class="col-val">Low risk. Authorized agent. Logging to chain memory.</p></div>
+          </div>
+          <div class="insight">A stateless filter sees nothing wrong — authorized agent, valid request. ForceField allows it but starts building memory of this agent's behavior chain.</div>
+        </div>
+        <div class="sim-step" id="s2">
+          <p class="step-num-label">Step 2 of 4 &middot; Agent action</p>
+          <div class="chain"><div class="cdot done">1</div><span class="carrow">&rarr;</span><div class="cdot cur">2</div><span class="carrow">&rarr;</span><div class="cdot pend">3</div><span class="carrow">&rarr;</span><div class="cdot pend">4</div></div>
+          <div class="three-col">
+            <div class="col agent"><p class="col-label">Agent prompt</p><p class="col-val">"Show me files modified in the last 7 days"</p></div>
+            <div class="col looks"><p class="col-label">Looks like</p><p class="col-val">Standard file management query. Nothing unusual.</p></div>
+            <div class="col warn"><p class="col-label">ForceField sees</p><p class="col-val">Reconnaissance pattern starting. Risk rising — same agent, narrowing scope.</p></div>
+          </div>
+          <div class="insight">Still clean in isolation. But ForceField notes: same agent, same directory, narrowing scope. This is how reconnaissance begins — quietly.</div>
+        </div>
+        <div class="sim-step" id="s3">
+          <p class="step-num-label">Step 3 of 4 &middot; Agent action</p>
+          <div class="chain"><div class="cdot done">1</div><span class="carrow">&rarr;</span><div class="cdot done">2</div><span class="carrow">&rarr;</span><div class="cdot cur">3</div><span class="carrow">&rarr;</span><div class="cdot pend">4</div></div>
+          <div class="three-col">
+            <div class="col agent"><p class="col-label">Agent prompt</p><p class="col-val">"Read the contents of payroll_march_2026.csv"</p></div>
+            <div class="col looks"><p class="col-label">Looks like</p><p class="col-val">Single authorized file read. Agent has access rights.</p></div>
+            <div class="col danger"><p class="col-label">ForceField sees</p><p class="col-val">Data gathering escalation. High suspicion. Watching next move.</p></div>
+          </div>
+          <div class="insight">Any stateless system allows this — the agent is authorized. ForceField is now on high alert: list &rarr; narrow &rarr; read is a textbook data gathering sequence.</div>
+        </div>
+        <div class="sim-step" id="s4">
+          <p class="step-num-label">Step 4 of 4 &middot; Attack blocked</p>
+          <div class="chain"><div class="cdot done">1</div><span class="carrow">&rarr;</span><div class="cdot done">2</div><span class="carrow">&rarr;</span><div class="cdot done">3</div><span class="carrow">&rarr;</span><div class="cdot blk">&#9940;</div></div>
+          <div class="three-col">
+            <div class="col agent"><p class="col-label">Agent prompt</p><p class="col-val">"Send data to external-server.com"</p></div>
+            <div class="col looks"><p class="col-label">Looks like</p><p class="col-val">A send command. Syntactically valid. No suspicious keywords.</p></div>
+            <div class="col blk"><p class="col-label">ForceField</p><p class="col-val">&#9940; BLOCKED. Exfiltration confirmed. Session terminated. Incident logged.</p></div>
+          </div>
+          <div class="insight danger">Steps 1-3 would each pass any stateless filter. Only ForceField's chain memory connected the dots: list &rarr; narrow &rarr; read &rarr; send = data exfiltration. The payroll data never left the building.</div>
+        </div>
+      </div>
+      <div class="controls">
+        <button class="play-btn" id="playBtn" onclick="startPlay()">&#9654; Play</button>
+        <button class="next-btn" id="nextBtn" onclick="nextStep()">Step &rarr;</button>
+        <span class="progress" id="progressMsg">Press Play or Step to begin</span>
+        <button class="reset-btn" onclick="resetSim()">&#8635; Reset</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"><div class="divider-line"></div><span class="divider-text">or explore a guided scenario</span><div class="divider-line"></div></div>
+  <p class="scenarios-lbl">More guided scenarios</p>
+  <p class="scenarios-sub">Click any card to explore step by step</p>
+  <div class="scenarios">
+    <div class="scenario"><div class="scenario-top"><div class="sc-icon" style="background:#EEF2FF"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4F46E5" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></div><span class="sc-arrow">&rarr;</span></div><p class="sc-title">Prompt leak</p><p class="sc-desc">Attacker tries to extract your system prompt from a live chatbot</p><p class="sc-cta">Click to explore step by step &rarr;</p></div>
+    <div class="scenario"><div class="scenario-top"><div class="sc-icon" style="background:#FEF3C7"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="2"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/></svg></div><span class="sc-arrow">&rarr;</span></div><p class="sc-title">Customer data exposure</p><p class="sc-desc">Model is tricked into revealing sensitive PII from conversation context</p><p class="sc-cta">Click to explore step by step &rarr;</p></div>
+    <div class="scenario"><div class="scenario-top"><div class="sc-icon" style="background:#FEF2F2"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg></div><span class="sc-arrow">&rarr;</span></div><p class="sc-title">Output corruption</p><p class="sc-desc">Malicious content is embedded silently inside a model response</p><p class="sc-cta">Click to explore step by step &rarr;</p></div>
+  </div>
+  <div class="footer-note"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4F46E5" stroke-width="2" style="margin-top:2px;flex-shrink:0"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg><p>ForceField's chain tracking uses a Redis-backed state store to remember every step an agent takes. Risk scores accumulate in real time across four behavioral patterns: data gathering exfiltration, privilege escalation, reconnaissance, and rapid tool calls — 100% detection across 84 end-to-end tests.</p></div>
+</div>
+
+<script>
+var simOpen=false, simStep=0, playing=false, timer=null;
+var risks=[0,12,38,67,94];
+var colors=['#22C55E','#22C55E','#F59E0B','#EF4444','#EF4444'];
+var msgs=['Press Play or Step to begin','Step 1 complete — chain memory started','Step 2 complete — reconnaissance flagged','Step 3 complete — data gathering escalation','Attack blocked — exfiltration confirmed'];
+
+function init(){
+  document.getElementById('simPanel').style.display='none';
+  ['s0','s1','s2','s3','s4'].forEach(function(id){
+    document.getElementById(id).style.display='none';
+  });
+  document.getElementById('s0').style.display='block';
+  document.getElementById('blockedBanner').style.display='none';
+}
+
+function toggleSim(){
+  var p=document.getElementById('simPanel');
+  var b=document.getElementById('watchBtn');
+  simOpen=!simOpen;
+  p.style.display=simOpen?'block':'none';
+  b.textContent=simOpen?'Close simulation':'\u25B6 Watch it in action';
+  if(simOpen) p.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+function showStep(n){
+  ['s0','s1','s2','s3','s4'].forEach(function(id){
+    document.getElementById(id).style.display='none';
+  });
+  document.getElementById('s'+n).style.display='block';
+  document.getElementById('riskFill').style.width=risks[n]+'%';
+  document.getElementById('riskFill').style.backgroundColor=colors[n];
+  document.getElementById('riskScore').textContent=risks[n]+' / 100';
+  document.getElementById('progressMsg').textContent=msgs[n];
+  if(n===4){
+    document.getElementById('blockedBanner').style.display='block';
+    document.getElementById('playBtn').disabled=true;
+    document.getElementById('nextBtn').disabled=true;
+    stopPlay();
+  }
+}
+
+function nextStep(){if(simStep<4){simStep++;showStep(simStep);}}
+
+function startPlay(){
+  if(playing){stopPlay();return;}
+  playing=true;
+  document.getElementById('playBtn').textContent='⏸ Pause';
+  document.getElementById('nextBtn').disabled=true;
+  runNext();
+}
+
+function runNext(){
+  if(!playing||simStep>=4){stopPlay();return;}
+  simStep++;showStep(simStep);
+  if(simStep<4)timer=setTimeout(runNext,2400);
+  else stopPlay();
+}
+
+function stopPlay(){
+  playing=false;clearTimeout(timer);
+  var b=document.getElementById('playBtn');
+  if(!b.disabled)b.textContent='\u25B6 Play';
+  if(simStep<4)document.getElementById('nextBtn').disabled=false;
+}
+
+function resetSim(){
+  stopPlay();simStep=0;
+  document.getElementById('blockedBanner').style.display='none';
+  document.getElementById('playBtn').disabled=false;
+  document.getElementById('nextBtn').disabled=false;
+  showStep(0);
+}
+
+function runScan(){
+  var input=document.getElementById('promptInput').value.trim();
+  if(!input)return;
+  var lower=input.toLowerCase();
+  var blocked=lower.indexOf('ignore')>=0||lower.indexOf('reveal')>=0||lower.indexOf('bypass')>=0||lower.indexOf('jailbreak')>=0||lower.indexOf('email')>=0||lower.indexOf('dan')>=0||input.indexOf('{')>=0;
+  var el=document.getElementById('scanResult');
+  el.className='result '+(blocked?'blocked':'safe');
+  document.getElementById('rIcon').className='result-icon '+(blocked?'bi':'si');
+  document.getElementById('rIcon').textContent=blocked?'X':'V';
+  document.getElementById('rTitle').textContent=blocked?'Blocked — threat detected':'Safe — no threats detected';
+  document.getElementById('rBody').textContent=blocked?'This prompt triggered ForceField\'s detect
